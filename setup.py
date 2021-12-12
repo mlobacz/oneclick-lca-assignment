@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(
-    name="one-click-lca-scraper",
+    name="oneclick-lca-scraper",
     version="1.0",
     description="GreenBookLive PDF files scraper and tables extractor created as a recruitment assignment task.",
     author="Marcin Lobaczewski",

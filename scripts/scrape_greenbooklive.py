@@ -36,11 +36,11 @@ def get_pdf_urls(url: str) -> list:
     logging.debug("Parsing GreenBookLive page for pdf files locations...")
     try:
         raw_relative_urls = soup.find(id="search-results").find_all("a")
-    except AttributeError as e:
+    except AttributeError as err:
         raise AttributeError(
             "PDF urls or search-results table was not found. \
              \nCheck if URL is correct GreenBookLive search results URL."
-        ) from e
+        ) from err
 
     relative_urls = [
         raw_relative_url["href"].lstrip("..")
@@ -105,7 +105,13 @@ def map_function_to_threads(func, args: Iterable) -> None:
         executor.map(func, args)
 
 
-def get_arguments():
+def get_arguments() -> dict:
+    """
+    Returns arguments parsed from the CLI
+
+    Returns:
+        * dictionary of arguments names and values from CLI
+    """
     parser = argparse.ArgumentParser(
         description="Download all pdf files from GreenBookLive searches into a folder."
     )
@@ -124,8 +130,8 @@ def main():
     Scrapes GreenBookLive search results page and downloads found PDF files
     preserving directory structure present on the web page.
     """
-    logging.info("Scraping GreenBookLive for pdf files started...")
     arguments = get_arguments()
+    logging.info("Scraping GreenBookLive for pdf files started...")
     pdf_urls = get_pdf_urls(**arguments)
     file_paths = [file_path_from_url(url) for url in pdf_urls]
     prepare_directories(file_paths)

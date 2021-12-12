@@ -38,6 +38,8 @@ toml==0.10.2
     #   pylint
 tomli==1.2.2
     # via black
+types-requests==2.26.1
+    # via -r dev-requirements.in
 typing-extensions==4.0.1
     # via
     #   astroid
