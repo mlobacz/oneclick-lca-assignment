@@ -2,3 +2,5 @@
 pdfdocs
 .vscode
 .mypy_cache
+build
+*.egg-info

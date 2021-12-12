@@ -14,5 +14,5 @@ setup(
         "camelot-py[cv] >= 0.10.1",
         "opencv-contrib-python-headless >= 4.5.4.60",
     ],
-    scripts=["scripts/*"],
+    scripts=["scripts/scrape_greenbooklive.py", "scripts/extract_table.py"],
 )
