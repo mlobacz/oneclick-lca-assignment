@@ -4,6 +4,7 @@
 Download all pdf files from GreenBookLive searches into a folder.
 """
 import logging
+import argparse
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Iterable, List
@@ -12,8 +13,6 @@ from urllib.parse import urljoin, urlsplit
 import requests
 from bs4 import BeautifulSoup
 
-URL = "https://www.greenbooklive.com/search/companysearch.jsp?from=0&partid=10028&sectionid=0&companyName=&productName=&productType=&certNo=&regionId=0&countryId=0&addressPostcode=&certBody=&id=260&results_pp=1000&sortResultsComp"  # pylint: disable=C0301
-
 
 logging.basicConfig(
     format="%(levelname)s:%(asctime)s:%(name)s: %(message)s", level=logging.INFO
@@ -21,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__file__)
 
 
-def get_pdf_urls(page_url: str) -> list:
+def get_pdf_urls(url: str) -> list:
     """
     Get all urls leading to pdf files from GreenBookLive search results page.
 
@@ -32,16 +31,24 @@ def get_pdf_urls(page_url: str) -> list:
         * List strings with pdf urls.
     """
     logging.debug("Getting GreenBookLive page content...")
-    page_content = requests.get(page_url).content
+    page_content = requests.get(url).content
     soup = BeautifulSoup(page_content, "html.parser")
     logging.debug("Parsing GreenBookLive page for pdf files locations...")
-    raw_relative_urls = soup.find(id="search-results").find_all("a")
+    try:
+        raw_relative_urls = soup.find(id="search-results").find_all("a")
+    except AttributeError as e:
+        raise AttributeError(
+            "PDF urls or search-results table was not found. \
+             \nCheck if URL is correct GreenBookLive search results URL."
+        ) from e
+
     relative_urls = [
         raw_relative_url["href"].lstrip("..")
         for raw_relative_url in raw_relative_urls
         if raw_relative_url["href"].endswith(".pdf")
     ]
-    return [urljoin(page_url, relative_url) for relative_url in relative_urls]
+    logging.info(f"Found {len(relative_urls)} PDF files locations.")
+    return [urljoin(url, relative_url) for relative_url in relative_urls]
 
 
 def file_path_from_url(url: str) -> Path:
@@ -98,13 +105,28 @@ def map_function_to_threads(func, args: Iterable) -> None:
         executor.map(func, args)
 
 
+def get_arguments():
+    parser = argparse.ArgumentParser(
+        description="Download all pdf files from GreenBookLive searches into a folder."
+    )
+    parser.add_argument(
+        "--url",
+        type=str,
+        default="https://www.greenbooklive.com/search/companysearch.jsp?from=0&partid=10028&sectionid=0&companyName=&productName=&productType=&certNo=&regionId=0&countryId=0&addressPostcode=&certBody=&id=260&results_pp=1000&sortResultsComp",  # pylint: disable=C0301,
+        help="URL to webpage with GreenBookLive search results.",
+    )
+    args = parser.parse_args()
+    return dict(url=args.url)
+
+
 def main():
     """
     Scrapes GreenBookLive search results page and downloads found PDF files
     preserving directory structure present on the web page.
     """
     logging.info("Scraping GreenBookLive for pdf files started...")
-    pdf_urls = get_pdf_urls(page_url=URL)
+    arguments = get_arguments()
+    pdf_urls = get_pdf_urls(**arguments)
     file_paths = [file_path_from_url(url) for url in pdf_urls]
     prepare_directories(file_paths)
     map_function_to_threads(download_pdf, pdf_urls)
