@@ -39,10 +39,10 @@ For each task, separate python script was created. Each of them is configurable 
 
     ```bash
     pip install --upgrade pip
-    pip install .
+    pip install . --no-cache-dir (last flag is optional, but may be needed in case of issues with dependecies)
     ```
 
-5. At this moment, scraping should work fine. Extracting tables however, may need some extra dependecies. If necessary check the details in [camelot documentation](https://camelot-py.readthedocs.io/en/master/user/install-deps.html).
+5. (OPTIONAL) At this moment, both scraping and extracting pfds should work fine. Extracting tables however, may need some extra dependecies. If necessary check the details in [camelot documentation](https://camelot-py.readthedocs.io/en/master/user/install-deps.html).
 
    * For Ubuntu
     ```bash
@@ -69,9 +69,10 @@ For each task, separate python script was created. Each of them is configurable 
     ```bash
     python3 scripts/extract_table.py [relative_path_to_pdf] [comma delimited numbers of pages with tables] [accuracy(optional)]
     ```
-    for example below command will exctract tables from page 8 of `pdfdocs/mrepd/R00024.pdf` file with default accuracy of 95.
+    for example below commands will extract tables from all pages of `pdfdocs/mrepd/R00024.pdf` and `pdfdocs/mrepd/R00025.pdf` files with default accuracy of 95.
     ```bash
-    python3 scripts/extract_table.py pdfdocs/mrepd/R00024.pdf 8
+    python3 scripts/extract_table.py pdfdocs/mrepd/R00024.pdf all
+    python3 scripts/extract_table.py pdfdocs/mrepd/R00025.pdf all
     ```
     for help (like example page values) type:
     ```bash
