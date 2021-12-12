@@ -9,7 +9,9 @@ astroid==2.9.0
 black==21.12b0
     # via -r dev-requirements.in
 click==8.0.3
-    # via black
+    # via
+    #   -c requirements.txt
+    #   black
 isort==5.10.1
     # via pylint
 lazy-object-proxy==1.6.0

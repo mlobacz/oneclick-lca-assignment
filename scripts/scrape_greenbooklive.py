@@ -1,14 +1,16 @@
+#!/usr/bin/env python3
+
 """
 Download all pdf files from a page into a folder.
 """
 import logging
-import requests
-from typing import Iterable
-from bs4 import BeautifulSoup
-import requests
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from urllib.parse import urlsplit, urljoin
+from typing import Iterable
+from urllib.parse import urljoin, urlsplit
+
+import requests
+from bs4 import BeautifulSoup
 
 URL = "https://www.greenbooklive.com/search/companysearch.jsp?from=0&partid=10028&sectionid=0&companyName=&productName=&productType=&certNo=&regionId=0&countryId=0&addressPostcode=&certBody=&id=260&results_pp=1000&sortResultsComp"
 
@@ -34,12 +36,12 @@ def get_pdf_urls(site_url: str) -> list:  # or return a generator in the future
 
 
 def file_path_from_url(url: str) -> Path:
-    return Path(urlsplit(url).path.lstrip("/")
-)
+    return Path(urlsplit(url).path.lstrip("/"))
 
-def prepare_directories(urls: list) -> None:
-    for url in urls:
-        directory_structure = file_path_from_url(url).parent
+
+def prepare_directories(file_paths: list) -> None:
+    for file_path in file_paths:
+        directory_structure = file_path.parent
         logging.debug(f"Preparing {directory_structure} directory...")
         directory_structure.mkdir(parents=True, exist_ok=True)
 
@@ -48,9 +50,9 @@ def download_pdf(url: str) -> None:
     logger.info(f"Downloading pdf data from: {url}...")
     response = requests.get(url, stream=True)
     file_path = file_path_from_url(url)
-    with open(file_path, "wb") as f:
+    with open(file_path, "wb") as pdf_file:
         for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
+            pdf_file.write(chunk)
         logger.info(f"Downloaded pdf data from:{url} to: {file_path}!")
 
 
@@ -62,7 +64,8 @@ def map_function_to_threads(func, iterable_of_args: Iterable) -> None:
 def main():
     logging.info("Scraping GreenBookLive for pdf files started...")
     pdf_urls = get_pdf_urls(site_url=URL)
-    prepare_directories(pdf_urls)
+    file_paths = [file_path_from_url(url) for url in pdf_urls]
+    prepare_directories(file_paths)
     map_function_to_threads(download_pdf, pdf_urls)
     logging.info("Scraping GreenBookLive for pdf files finished!")
 

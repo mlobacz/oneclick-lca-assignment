@@ -1,2 +1,4 @@
 beautifulsoup4
 requests
+camelot-py[cv]
+opencv-contrib-python-headless
