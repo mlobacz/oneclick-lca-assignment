@@ -4,3 +4,4 @@ pdfdocs
 .mypy_cache
 build
 *.egg-info
+env
